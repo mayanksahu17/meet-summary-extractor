@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "Google Meet Summarizer",
+    "version": "1.0",
+    "description": "Summarizes Google Meet conversations in listicle format",
+    "permissions": ["activeTab"],  
+    "action": {
+      "default_popup": "popup.html"   
+    },
+    "content_scripts": [{
+      "matches": ["https://meet.google.com/*"],  
+      "js": ["content.js"]   
+    }]
+  }
+  
