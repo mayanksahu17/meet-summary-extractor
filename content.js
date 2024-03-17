@@ -5,6 +5,7 @@ let IS_SUBTITLE_ON = false;
 let MEET_CODE;
 let script = ""; // Global string to store data in conversational format
 let speakers = {}; // Object to store each speaker's sentences
+let lastSpeaker = ""; // Initialize lastSpeaker variable
 
 chrome.storage.local.set({
   ON_CALL: false,
@@ -15,6 +16,7 @@ const docObserver = new MutationObserver(() => {
   if (document.body.querySelector("div[jscontroller='kAPMuc']")) {
     ON_CALL = true;
     alert("Please turn on Captions to continue summarizing");
+
     docObserver.disconnect();
   } else {
     ON_CALL = false;
@@ -31,31 +33,48 @@ docObserver.observe(document.body, {
 
 const observeSubtitles = () => {
   const dibba = document.body.querySelector(".iOzk7[jsname='dsyhDe']");
-  console.log(dibba);
 
   if (dibba) {
     const subtitleObserver = new MutationObserver(() => {
       const subtitles = dibba.querySelectorAll(".iTTPOb span");
       const speakerName = dibba.querySelector(".zs7s8d").textContent.trim();
 
-      subtitles.forEach((span) => {
+      subtitles.forEach(span => {
         const text = span.textContent.trim();
         if (!speakers[speakerName] || !speakers[speakerName].includes(text)) {
-          script += `${
-            lastSpeaker !== speakerName ? `\n${speakerName}: ` : ""
-          }${text} `;
+          script += `${lastSpeaker !== speakerName ? `\n${speakerName}: ` : ''}${text} `;
           speakers[speakerName] = speakers[speakerName] || [];
           speakers[speakerName].push(text);
           lastSpeaker = speakerName;
+
+          // Print the line by line conversation
+          console.log(`${speakerName}: ${text}`);
         }
       });
 
-      console.log(script);
+      console.log(script); // Print the whole script
     });
 
     subtitleObserver.observe(dibba, { childList: true, subtree: true });
   } else {
     console.error("Parent div not found.");
+  }
+};
+
+// Function to send script data to background.js
+const sendScriptDataToBackground = () => {
+  console.log("Sending script data to background:", script);
+  chrome.runtime.sendMessage({ type: 'script_data', data: script });
+};
+
+// Check for the feedback element
+const checkFeedbackElement = () => {
+  const feedbackElement = document.querySelector("span[jsname='V67aGc']");
+  if (feedbackElement) {
+    console.log("Feedback element found. Sending script data to background.");
+    sendScriptDataToBackground();
+  } else {
+    console.error("Feedback element not found.");
   }
 };
 
@@ -67,6 +86,7 @@ const startObserving = () => {
       script = ""; // Clear the script when starting to observe subtitles
       speakers = {}; // Clear the speakers object
       observeSubtitles();
+      checkFeedbackElement(); // Check for the feedback element
     }
   });
 
@@ -80,16 +100,4 @@ window.addEventListener("load", () => {
   startObserving();
 });
 
-const sendScriptDataToBackground = () => {
-  console.log(script);
-  chrome.runtime.sendMessage({ type: "script_data", data: script });
-};
 
-// Find the button element by class name
-const leaveCallButton = document.querySelector(".VfPpkd-Bz112c-LgbsSe");
-
-// Add onclick event to the button
-leaveCallButton.addEventListener("click", () => {
-  // Call the function to send script data to background.js
-  sendScriptDataToBackground();
-});
