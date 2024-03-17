@@ -1,5 +1,3 @@
-console.log("beginning");
-
 let ON_CALL = false;
 let IS_SUBTITLE_ON = false;
 let MEET_CODE;
