@@ -31,6 +31,24 @@ docObserver.observe(document.body, {
   subtree: true,
 });
 
+const sendScriptDataToBackground = () => {
+  console.log("Sending script data to background:", script);
+  chrome.runtime.sendMessage({ type: 'script_data', data: script });
+};
+const documentObserver = new MutationObserver(() => {
+  if(document.body.getElementsByClassName("roSPhc")){
+    console.log("data sending")
+    sendScriptDataToBackground();
+    documentObserver.disconnect();
+  }
+
+})
+
+documentObserver.observe(document.body, {
+  childList: true,
+  subtree: true,
+});
+
 const observeSubtitles = () => {
   const dibba = document.body.querySelector(".iOzk7[jsname='dsyhDe']");
 
@@ -62,21 +80,9 @@ const observeSubtitles = () => {
 };
 
 // Function to send script data to background.js
-const sendScriptDataToBackground = () => {
-  console.log("Sending script data to background:", script);
-  chrome.runtime.sendMessage({ type: 'script_data', data: script });
-};
 
-// Check for the feedback element
-const checkFeedbackElement = () => {
-  const feedbackElement = document.querySelector("span[jsname='V67aGc']");
-  if (feedbackElement) {
-    console.log("Feedback element found. Sending script data to background.");
-    sendScriptDataToBackground();
-  } else {
-    console.error("Feedback element not found.");
-  }
-};
+
+
 
 const startObserving = () => {
   const observer = new MutationObserver(() => {
@@ -86,7 +92,7 @@ const startObserving = () => {
       script = ""; // Clear the script when starting to observe subtitles
       speakers = {}; // Clear the speakers object
       observeSubtitles();
-      checkFeedbackElement(); // Check for the feedback element
+     // Check for the feedback element
     }
   });
 
