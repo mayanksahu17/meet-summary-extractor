@@ -3,16 +3,14 @@
   "name": "Google Meet Summarizer",
   "version": "1.0",
   "description": "Summarizes Google Meet conversations in listicle format",
-  "background": {
-    "service_worker": "background.js"
-  },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["activeTab","storage"],
   "action": {
     "default_popup": "popup.html"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
+  
   "content_scripts": [{
     "matches": ["https://meet.google.com/*"],
     "js": ["content.js"]
