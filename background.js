@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "script_data") {
       const scriptData = request.data; // Get the script data from the content script
-  
+      console.log(request.data);
       // Make the API call to Gemini
       fetch("https://gemini-server-hsl4.onrender.com/api/v1/generate", {
         method: "POST",

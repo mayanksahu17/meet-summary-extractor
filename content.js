@@ -6,7 +6,7 @@ let MEET_CODE;
 let script = ""; // Global string to store data in conversational format
 let speakers = {}; // Object to store each speaker's sentences
 let lastSpeaker = ""; // Initialize lastSpeaker variable
-
+let TOGGLE = false
 chrome.storage.local.set({
   ON_CALL: false,
   subtitleWarning: false,
@@ -20,9 +20,9 @@ const docObserver = new MutationObserver(() => {
     docObserver.disconnect();
   } else {
     ON_CALL = false;
-    chrome.storage.local.set({
-      ON_CALL: false,
-    });
+    // chrome.storage.local.set({
+    //   ON_CALL: false,
+    // });
   }
 });
 
@@ -31,14 +31,14 @@ docObserver.observe(document.body, {
   subtree: true,
 });
 
-const sendScriptDataToBackground = () => {
-  console.log("Sending script data to background:", script);
-  chrome.runtime.sendMessage({ type: 'script_data', data: script });
-};
+// const sendScriptDataToBackground = () => {
+//   console.log("Sending script data to background:", script);
+//   chrome.runtime.sendMessage({ type: 'script_data', data: script });
+// };
 const documentObserver = new MutationObserver(() => {
   if(document.body.getElementsByClassName("roSPhc")){
-    console.log("data sending")
-    sendScriptDataToBackground();
+    // console.log("data sending")
+    // sendScriptDataToBackground();
     documentObserver.disconnect();
   }
 
@@ -79,9 +79,6 @@ const observeSubtitles = () => {
   }
 };
 
-// Function to send script data to background.js
-
-
 
 
 const startObserving = () => {
@@ -89,11 +86,23 @@ const startObserving = () => {
     const dibba = document.body.querySelector(".iOzk7[jsname='dsyhDe']");
     if (dibba && !IS_SUBTITLE_ON) {
       IS_SUBTITLE_ON = true;
-      script = ""; // Clear the script when starting to observe subtitles
-      speakers = {}; // Clear the speakers object
+      script = ""; 
+      speakers = {}; 
       observeSubtitles();
-     // Check for the feedback element
+  
     }
+
+
+    const endCall = document.querySelector(".NHaLPe[jscontroller='m1IMT'][jsaction='JIbuQc:wB8Z8d']")
+    if (endCall && !TOGGLE) {
+      endCall.addEventListener('click', ()=>{
+        TOGGLE=true;
+        console.log("The call has ended!");
+        console.log("Sending this to background:", script);
+        chrome.runtime.sendMessage({ type: 'script_data', data: script });
+      });
+    }
+    
   });
 
   observer.observe(document.body, {
